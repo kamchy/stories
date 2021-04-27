@@ -37,8 +37,8 @@ async function main(rootPath: string, destDir: string) {
   for (const sourceDir of dirs) {
     const parsedSourceDir = d.path.parse(sourceDir)
     const fullDestDir : string = d.path.join(destDir, parsedSourceDir.base); 
-    const gen = new Generator(sourceDir, fullDestDir);
-    const resStr =  await gen.show();
+    const gen = new Generator();
+    const resStr =  await gen.show(sourceDir, fullDestDir);
     console.log(resStr);
   }
 }

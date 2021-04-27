@@ -9,14 +9,16 @@ export interface BookDesc {
   title: string,
   titleImagePath: string,
   footer: string,
-  pages: Array<PageDesc> 
+  pages: Array<PageDesc>
 }
 
 interface GenerationData {
   sourceDir: string,
   destDir: string,
   destFile: string,
-  assetsDir: string
+  assetsDir: string,
+  imgwidth: number,
+  imgheight: number,
 }
 
 export class Generator {
@@ -43,9 +45,9 @@ export class Generator {
     for (const f of assets) {
       const source = d.path.join(genData.sourceDir, f as string);
       const parsedSource = d.path.parse(source);
-      const dest = d.path.join(genData.destDir, parsedSource.base);
+      const dest = d.path.join(genData.destDir, genData.assetsDir, parsedSource.base);
       console.log(`copy ${source} to ${dest}`);
-      await d.copy(source, dest);  
+      await d.copy(source, dest, {overwrite: true});
     }
 
   }
@@ -62,13 +64,21 @@ export class Generator {
     <html>
     </body>
     <h1>${rec.title}</h1>
-    <img src="${genData.assetsDir}/${rec.titleImagePath}"/>
+    <img
+    width="${genData.imgwidth}"
+    height="${genData.imgheight}"
+    src="${genData.assetsDir}/${rec.titleImagePath}"/>
     `;
     for (const page of pages) {
+      const lines = (page.text as unknown as string).split("\n").map((l: string) => `<div>${l}</div>`).join("");
       s += `
       <div>
-        <img src="${genData.assetsDir}/${page.imagePath}" />  
-        <p> ${page.text} </p>
+        <img
+        width="${genData.imgwidth}"
+        height="${genData.imgheight}"
+        src="${genData.assetsDir}/${page.imagePath}" />
+
+        <p> ${lines} </p>
       </div>
       <div id="foter"><span>${rec.footer}</span><span>${page.number}</span>
       `;
@@ -92,7 +102,14 @@ export class Generator {
       const fileContent = await this.readSource(tomlFile);
       const descriptionRecord = d.toml.parse(fileContent);
 
-      const genData = { sourceDir: sourceDir, destDir: destDir, destFile: "index.html", assetsDir: "assets" }; 
+      const genData = {
+        sourceDir: sourceDir,
+        destDir: destDir,
+        destFile: "index.html",
+        assetsDir: "assets",
+        imgwidth: 800,
+        imgheight: 600,
+      };
       await this.generate(descriptionRecord, genData);
       await this.copyAssets(descriptionRecord, genData);
       return Promise.resolve(` wrote to ${d.path.join(genData.destDir, genData.destFile)}`);

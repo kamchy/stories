@@ -1,33 +1,15 @@
 import * as d from "./deps.ts";
-export interface PageDesc {
-  number: number,
-  imagePath: string,
-  text: Array<string>
-}
+import StoryRenderer from "./renderer.ts";
+import { PageDesc, GenerationData } from "./types.ts";
 
-export interface BookDesc {
-  title: string,
-  titleImagePath: string,
-  footer: string,
-  pages: Array<PageDesc>
-}
-
-interface GenerationData {
-  sourceDir: string,
-  destDir: string,
-  destFile: string,
-  assetsDir: string,
-  imgwidth: number,
-  imgheight: number,
-}
 
 export class Generator {
   DESC_NAME = "description.toml";
+  renderer = new StoryRenderer();
+  decoder = new TextDecoder('utf-8');
 
   async readSource(fname: string): Promise<string> {
-    const decoder = new TextDecoder('utf-8');
-    const text = decoder.decode(await Deno.readFile(fname));
-    return text;
+    return this.decoder.decode(await Deno.readFile(fname));
   }
 
   async copyAssets(rec: Record<string, unknown>, genData: GenerationData) {
@@ -45,49 +27,25 @@ export class Generator {
     for (const f of assets) {
       const source = d.path.join(genData.sourceDir, f as string);
       const parsedSource = d.path.parse(source);
-      const dest = d.path.join(genData.destDir, genData.assetsDir, parsedSource.base);
+      const dest = d.path.join(destAssetsDir, parsedSource.base);
       console.log(`copy ${source} to ${dest}`);
       await d.copy(source, dest, {overwrite: true});
     }
-
+    d.copy(d.path.join(Deno.cwd(), genData.cssFile), 
+           d.path.join(destAssetsDir, genData.cssFile), 
+           {overwrite: true});
   }
 
-  async generate(rec: Record<string, unknown>, genData: GenerationData) {
-    const destIndexFile = d.path.join(genData.destDir, "index.html");
+  
+
+  async generateFile(rec: Record<string, unknown>, genData: GenerationData) {
+    const destIndexFile = d.path.join(genData.destDir, genData.destFile);
     await d.ensureFile(destIndexFile);
     console.log(`created ${destIndexFile}`);
+      
 
-    const pages: Array<PageDesc> = (rec.pages as Array<PageDesc>);
-    pages.sort(page => page.number);
-    let s = `
-    <DOCTYPE html>
-    <html>
-    </body>
-    <h1>${rec.title}</h1>
-    <img
-    width="${genData.imgwidth}"
-    height="${genData.imgheight}"
-    src="${genData.assetsDir}/${rec.titleImagePath}"/>
-    `;
-    for (const page of pages) {
-      const lines = (page.text as unknown as string).split("\n").map((l: string) => `<div>${l}</div>`).join("");
-      s += `
-      <div>
-        <img
-        width="${genData.imgwidth}"
-        height="${genData.imgheight}"
-        src="${genData.assetsDir}/${page.imagePath}" />
-
-        <p> ${lines} </p>
-      </div>
-      <div id="foter"><span>${rec.footer}</span><span>${page.number}</span>
-      `;
-    }
-    s += `
-    <p>${rec.footer}</p>
-    </body>
-    </html>
-    `;
+    (rec.pages as Array<PageDesc>).sort((page: PageDesc) => page.number);
+    const s = this.renderer.renderStory(rec, genData);
     console.log(s);
     await Deno.writeTextFile(destIndexFile, s);
 
@@ -109,8 +67,10 @@ export class Generator {
         assetsDir: "assets",
         imgwidth: 800,
         imgheight: 600,
+        cssFile: "styles.css",
       };
-      await this.generate(descriptionRecord, genData);
+
+      await this.generateFile(descriptionRecord, genData);
       await this.copyAssets(descriptionRecord, genData);
       return Promise.resolve(` wrote to ${d.path.join(genData.destDir, genData.destFile)}`);
     }

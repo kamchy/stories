@@ -1,0 +1,56 @@
+:root {
+  --footer-bg: hsl(200, 40%, 85%);
+  --footer-text: hsl(200, 90%, 15%);
+  .--page-bg: hsl(300, 20%, 90%);
+}
+
+html {
+  background-color: white;
+}
+
+#main {
+  background-color: beige;
+  display: flex;
+  flex-direction: column;
+  align-items:center;
+}
+
+img {
+  width: 30vw;
+  height: auto;
+}
+
+.page {
+  border: 1px solid black;
+  background-color: var(--page-bg);
+  display: flex;
+  flex-direction: column;
+  justify-items: space-between;
+  align-items: center;
+}
+.page .lineswrapper {
+  font-size: 2em;
+  margin-top: 2em;
+  
+}
+
+.page h1 {
+  font-size: 3em;
+  margin-bottom: 1em;
+}
+
+.footer {
+  align-self: stretch;
+  font-size: 1em;
+  margin-top: 2em;
+  display: flex;
+  flex-direction: row;
+  background-color: var(--footer-bg); 
+  align-items: center;
+  justify-content:  space-between;  
+  height: 10vh;
+  padding: 0 1em 0 1em;
+  color: var(--footer-text);
+}
+
+ 

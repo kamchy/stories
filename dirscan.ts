@@ -1,10 +1,7 @@
 import * as d  from "./deps.ts";
-import { Generator, BookDesc } from "./generator.ts";
+import { Generator} from "./generator.ts";
 
-function processError(e: string) {
-  console.log(e);
 
-}
 async function gatherSubdirs(root: string): Promise<Array<string>> {
     console.log("gather subdir for", root);
     const a = new Array<string>();
@@ -16,11 +13,6 @@ async function gatherSubdirs(root: string): Promise<Array<string>> {
     return a;
 }
 
-function display(a: Array<string>) {
-  for (const e of a) {
-    console.log("  ",  e);
-  }
-}
 
 async function listDirs(root: string): Promise<Array<string>> {
     const ex = await d.exists(root);

@@ -31,7 +31,8 @@ export class Generator {
       console.log(`copy ${source} to ${dest}`);
       await d.copy(source, dest, {overwrite: true});
     }
-    d.copy(d.path.join(Deno.cwd(), genData.cssFile), 
+
+    d.copy(d.path.join(Deno.cwd(), genData.sourceAssetsDir, genData.cssFile), 
            d.path.join(destAssetsDir, genData.cssFile), 
            {overwrite: true});
   }
@@ -64,10 +65,12 @@ export class Generator {
         sourceDir: sourceDir,
         destDir: destDir,
         destFile: "index.html",
+        sourceAssetsDir: "assets",
         assetsDir: "assets",
         imgwidth: 800,
         imgheight: 600,
         cssFile: "styles.css",
+        title: "Bajeczki dla Eweczki"
       };
 
       await this.generateFile(descriptionRecord, genData);

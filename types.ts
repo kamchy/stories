@@ -1,10 +1,15 @@
-
+/**
+* Describes single page in the book.
+* */
 export interface PageDesc {
   number: number,
   imagePath: string,
   text: Array<string>
 }
 
+/**
+*Single book.
+* */
 export interface BookDesc {
   title: string,
   titleImagePath: string,
@@ -13,6 +18,9 @@ export interface BookDesc {
   author?: string,
 }
 
+/**
+* Paths and info related to assets copying and html generation.
+* */
 export interface GenerationData {
   sourceDir: string,
   destDir: string,

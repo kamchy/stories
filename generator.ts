@@ -2,16 +2,34 @@ import * as d from "./deps.ts";
 import StoryRenderer from "./renderer.ts";
 import { PageDesc, GenerationData } from "./types.ts";
 
-
+/**
+* Generator for html version of stories.
+* Creates directory for static version of the story and copies relevant assets.
+* Directory contains: 
+*   * static html file genrated from descriptior.toml file
+*   * assets: image files indicated by descriptor.toml)
+*   * assets: css file
+* */
 export class Generator {
   DESC_NAME = "description.toml";
   renderer = new StoryRenderer();
   decoder = new TextDecoder('utf-8');
 
+  /** (Async) reads fully text file with given path
+   * @param fname path of a text file
+   * @return Promise of string
+  * */
   async readSource(fname: string): Promise<string> {
     return this.decoder.decode(await Deno.readFile(fname));
   }
 
+  /**
+  * Copies all images indicated by rec (deserialized story content descriptor from .toml)
+  * and css file to target directories according to GenerationData info.
+  *
+  * @param rec deserialized description.toml 
+  * @param genData info about source and destination paths where files will be copied
+  * */
   async copyAssets(rec: Record<string, unknown>, genData: GenerationData) {
     const destAssetsDir = d.path.join(genData.destDir, genData.assetsDir);
     console.log(`copy assets - ensure dir ${destAssetsDir}`);
@@ -38,7 +56,12 @@ export class Generator {
   }
 
   
-
+  /**
+  * (Async) generates html file with a story and images/css links.
+  *
+  * @param rec deserialized description.toml 
+  * @param genData info about source and destination paths where files will be copied
+  * */
   async generateFile(rec: Record<string, unknown>, genData: GenerationData) {
     const destIndexFile = d.path.join(genData.destDir, genData.destFile);
     await d.ensureFile(destIndexFile);
@@ -52,6 +75,18 @@ export class Generator {
 
   }
 
+  /**
+  * Main generation method of Generator.
+  * Deserializes .toml file.
+  * Generates html file.
+  * Copies assets to target (static) story directory.
+  *
+  * Assets are copied (and overwritten) unconditionally, even if not changed.
+  *
+  * @param sourceDir  source directory (story directory) with decription.toml file
+  * @param destDir  destination directory (corresponding to story directory) 
+  *                 where html file will be generated and assets copied.
+  * */
   async show(sourceDir: string, destDir: string): Promise<string> {
     const tomlFile = d.path.join(sourceDir, this.DESC_NAME);
     const ex = await d.exists(tomlFile);

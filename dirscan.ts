@@ -1,5 +1,6 @@
 import * as d  from "./deps.ts";
 import { Generator} from "./generator.ts";
+import { execFnIfDirExists } from "./utils.ts";
 
 /**
 * (Async) Gathers all subrirectories of give root path of depth 1,
@@ -19,20 +20,6 @@ async function gatherSubdirs(root: string): Promise<Array<string>> {
     return a;
 }
 
-/**
-* Checks if root exists; if so, calls gtherSubdirs(root).
-* @param root directory checked if exists
-* @return result of a call to gatherSubdirs(root) 
-* @throws Error if root does not exist
-* */
-async function listDirs(root: string): Promise<Array<string>> {
-    const ex = await d.exists(root);
-    if (ex) {
-      return gatherSubdirs(root);
-    } else {
-      throw new Error(`Root directory ${root} does not exist`);
-  }
-}
 
 /**
 * Scans rootpath for story directories and generates html pages to same-named subdirectory of destDir.
@@ -42,7 +29,7 @@ async function listDirs(root: string): Promise<Array<string>> {
 * @param destDir name of directory (created if needed) where html will be generated and resources (images from story directories) copied 
 * */
 async function main(rootPath: string, destDir: string) {
-  const dirs = await listDirs(rootPath);
+  const dirs = await execFnIfDirExists(rootPath, gatherSubdirs);
   for (const sourceDir of dirs) {
     const parsedSourceDir = d.path.parse(sourceDir)
     const fullDestDir : string = d.path.join(destDir, parsedSourceDir.base); 

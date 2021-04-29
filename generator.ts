@@ -1,6 +1,7 @@
 import * as d from "./deps.ts";
 import StoryRenderer from "./renderer.ts";
 import { PageDesc, GenerationData } from "./types.ts";
+import { readSource } from "./utils.ts";
 
 /**
 * Generator for html version of stories.
@@ -13,15 +14,7 @@ import { PageDesc, GenerationData } from "./types.ts";
 export class Generator {
   DESC_NAME = "description.toml";
   renderer = new StoryRenderer();
-  decoder = new TextDecoder('utf-8');
 
-  /** (Async) reads fully text file with given path
-   * @param fname path of a text file
-   * @return Promise of string
-  * */
-  async readSource(fname: string): Promise<string> {
-    return this.decoder.decode(await Deno.readFile(fname));
-  }
 
   /**
   * Copies all images indicated by rec (deserialized story content descriptor from .toml)
@@ -93,7 +86,7 @@ export class Generator {
     if (!ex) {
       return Promise.resolve(`${this.DESC_NAME} does not exist in ${sourceDir}`);
     } else {
-      const fileContent = await this.readSource(tomlFile);
+      const fileContent = await readSource(tomlFile);
       const descriptionRecord = d.toml.parse(fileContent);
 
       const genData = {

@@ -1,11 +1,12 @@
-import { GenerationData, PageDesc, BookDesc }  from "./types.ts";
+import { GenerationData, PageDesc, BookDesc, OutputBook}  from "./types.ts";
+import { path } from "./deps.ts";
 
 export function renderStory(
   rec: BookDesc, 
   genData: GenerationData,
 ) {
   const author = rec.author ?? "Kamila Chyla";
-
+  const footerLink = `<a href="../${genData.destFile}">${rec.footer}</a>`;
   let s = `
   <!doctype html>
   <html>
@@ -25,9 +26,10 @@ export function renderStory(
     height="${genData.imgheight}"
     src="${genData.assetsDir}/${rec.titleImagePath}"/>
 
-    <div class="footer">${rec.footer}</div>
+    <div class="footer">${footerLink}</div>
   </section>
   `;
+
   const pages = rec.pages as Array<PageDesc>;
   for (const page of pages) {
     const lines = (page.text as unknown as string).split("\n").map(
@@ -40,7 +42,7 @@ export function renderStory(
       height="${genData.imgheight}"
       src="${genData.assetsDir}/${page.imagePath}" />
       <div class="lineswrapper"> ${lines}</div>
-      <div class="footer"><span>${rec.footer}</span><span>${page.number}</span></div>
+      <div class="footer"><span>${footerLink}</span><span>${page.number}</span></div>
     </section>
     `;
   }
@@ -93,3 +95,43 @@ export function renderStory(
   return s;
 }
 
+function renderBook(book: OutputBook): string {
+  const outPath = path.parse(book.sourceDir);
+  const img: string = path.join(outPath.name, "assets", book.bookDesc.titleImagePath);
+  const ind: string = path.join(outPath.name, book.indexFileName);
+  return `
+  <div class="bookdesc">
+    <div>
+    <h2><a href="${ind}"> ${book.bookDesc.title} </a></h2>
+    <div>${book.bookDesc.author ?? ""}</div>
+    <a href="${ind}">
+      <img width="400" src="${img}"/>
+    </a>
+  </div>
+  `;
+}
+export function renderIndex(books: Array<OutputBook>): string {
+
+  const articles = books.map(b => `<article>${renderBook(b)}</article>`).join("\n");
+
+  const s = `
+  <!doctype html>
+  <html>
+  <head>
+  <title>bajki</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  </head>
+  <body>
+  <div id="main">
+  <title> Książeczki dla Eweczki </title>
+  <section class="page titlepage" >
+    ${articles}
+  </section>
+  </body>
+  </html>
+  `;
+
+  return s;
+}

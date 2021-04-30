@@ -33,6 +33,8 @@ export interface GenerationData {
   title: string
 }
 
-export interface DirectoryGenerationResult {
-
+export interface OutputBook {
+  bookDesc: BookDesc,
+  sourceDir: string,
+  indexFileName: string,
 }

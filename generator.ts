@@ -1,6 +1,6 @@
 import * as d from "./deps.ts";
-import { renderStory } from "./renderer.ts";
-import { GenerationData, PageDesc, BookDesc } from "./types.ts";
+import { renderStory, renderIndex } from "./renderer.ts";
+import { GenerationData, PageDesc, BookDesc, OutputBook } from "./types.ts";
 import { BookParser } from "./bookparser.ts";
 /**
 * Generator for html version of stories.
@@ -13,6 +13,7 @@ import { BookParser } from "./bookparser.ts";
 
 export class Generator {
   DESC_NAME = "description.toml";
+  books: Array<OutputBook> = [];
 
   async copy(source: string, dest: string) {
     const existsSource = await d.exists(source);
@@ -68,17 +69,18 @@ export class Generator {
   /**
   * (Async) generates html file with a story and images/css links.
   *
-  * @param rec deserialized description.toml 
-  * @param genData info about source and destination paths where files will be copied
+  * @param fileName name of file
+  * @param textProvide function that generates string to be written
   * */
-  async generateFile(rec: BookDesc, genData: GenerationData) {
-    const idx = this.indexFile(genData);
-
-    await d.ensureFile(idx);
-    await Deno.writeTextFile(idx, renderStory(rec, genData));
-    console.log(`Generated ${idx}`);
+  async generateFile(fileName: string, textProvider: ()=>string) {
+    await d.ensureFile(fileName);
+    await Deno.writeTextFile(fileName, textProvider());
+    console.log(`Generated ${fileName}`);
   }
 
+  appendOutputBook(bd: OutputBook) {
+    this.books.push(bd);
+  }
   /**
   * Main generation method of Generator.
   * Deserializes .toml file.
@@ -102,10 +104,22 @@ export class Generator {
       if (bd === null) {
         return "Could not parse" + tomlFile;
       }
+      this.appendOutputBook({bookDesc: bd, sourceDir: genData.sourceDir, indexFileName: genData.destFile});
       await d.ensureDir(genData.destDir);
-      await this.copyAssets(bd, genData);
-      await this.generateFile(bd, genData);
-      return `Written to ${this.indexFile(genData)}`;
+      this.copyAssets(bd, genData);
+      this.generateFile(
+        this.indexFile(genData), 
+        () => renderStory(bd, genData));
+      return this.indexFile(genData);
     }
+
+  }
+
+  generateBooksIndex(destDir: string) {
+    this.generateFile(
+      d.path.join(destDir, "index.html"), 
+      () => renderIndex(this.books)
+    )
+
   }
 }

@@ -39,13 +39,16 @@ const genData = {
 * */
 async function main(rootPath: string, destDir: string) {
   const dirs = await execFnIfDirExists(rootPath, gatherSubdirs);
+  const gen = new Generator();
   for (const sourceDir of dirs) {
     const parsedSourceDir = d.path.parse(sourceDir)
     const fullDestDir : string = d.path.join(destDir, parsedSourceDir.base); 
     await d.ensureDir(fullDestDir);
-    const gen = new Generator();
-    console.log(await gen.generateBookDirectory({sourceDir: sourceDir, destDir: fullDestDir, ...genData}));
+    const genConfig = {sourceDir: sourceDir, destDir: fullDestDir, ...genData}
+    await gen.generateBookDirectory(genConfig);
   }
+  gen.generateBooksIndex(destDir);
+  
 }
 
 /** Name of output directory */

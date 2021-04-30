@@ -1,6 +1,6 @@
 import * as d from "./deps.ts";
-import StoryRenderer from "./renderer.ts";
-import { PageDesc, GenerationData } from "./types.ts";
+import { renderStory } from "./renderer.ts";
+import { GenerationData, PageDesc } from "./types.ts";
 import { readSource } from "./utils.ts";
 
 /**
@@ -11,10 +11,25 @@ import { readSource } from "./utils.ts";
 *   * assets: image files indicated by descriptor.toml)
 *   * assets: css file
 * */
+
 export class Generator {
   DESC_NAME = "description.toml";
-  renderer = new StoryRenderer();
 
+  async copy(source: string, dest: string) {
+    const existsSource = await d.exists(source);
+    const existsDest = await d.exists(dest);
+    let sourceIsNewer = false;
+    if (existsDest) {
+      const ssm = (await Deno.stat(source)).mtime;
+      const dsm = (await Deno.stat(dest)).mtime;
+      sourceIsNewer = ssm !== null && dsm !== null && ssm > dsm;
+    }
+    const shouldCopy = existsSource && (!existsDest || sourceIsNewer);
+
+    if (shouldCopy) {
+      await d.copy(source, dest, { overwrite: true });
+    }
+  }
 
   /**
   * Copies all images indicated by rec (deserialized story content descriptor from .toml)
@@ -25,7 +40,6 @@ export class Generator {
   * */
   async copyAssets(rec: Record<string, unknown>, genData: GenerationData) {
     const destAssetsDir = d.path.join(genData.destDir, genData.assetsDir);
-    console.log(`copy assets - ensure dir ${destAssetsDir}`);
     await d.ensureDir(destAssetsDir);
 
     const assets = [];
@@ -39,16 +53,19 @@ export class Generator {
       const source = d.path.join(genData.sourceDir, f as string);
       const parsedSource = d.path.parse(source);
       const dest = d.path.join(destAssetsDir, parsedSource.base);
-      console.log(`copy ${source} to ${dest}`);
-      await d.copy(source, dest, {overwrite: true});
+      this.copy(source, dest);
     }
 
-    d.copy(d.path.join(Deno.cwd(), genData.sourceAssetsDir, genData.cssFile), 
-           d.path.join(destAssetsDir, genData.cssFile), 
-           {overwrite: true});
+    this.copy(
+      d.path.join(Deno.cwd(), genData.sourceAssetsDir, genData.cssFile),
+      d.path.join(destAssetsDir, genData.cssFile),
+    );
   }
 
-  
+  indexFile(genData: GenerationData): string {
+    return d.path.join(genData.destDir, genData.destFile);
+  }
+
   /**
   * (Async) generates html file with a story and images/css links.
   *
@@ -56,16 +73,11 @@ export class Generator {
   * @param genData info about source and destination paths where files will be copied
   * */
   async generateFile(rec: Record<string, unknown>, genData: GenerationData) {
-    const destIndexFile = d.path.join(genData.destDir, genData.destFile);
-    await d.ensureFile(destIndexFile);
-    console.log(`created ${destIndexFile}`);
-      
+    const idx = this.indexFile(genData);
 
-    (rec.pages as Array<PageDesc>).sort((page: PageDesc) => page.number);
-    const s = this.renderer.renderStory(rec, genData);
-    console.log(s);
-    await Deno.writeTextFile(destIndexFile, s);
-
+    await d.ensureFile(idx);
+    await Deno.writeTextFile(idx, renderStory(rec, genData));
+    console.log(`Generated ${idx}`);
   }
 
   /**
@@ -80,30 +92,22 @@ export class Generator {
   * @param destDir  destination directory (corresponding to story directory) 
   *                 where html file will be generated and assets copied.
   * */
-  async show(sourceDir: string, destDir: string): Promise<string> {
-    const tomlFile = d.path.join(sourceDir, this.DESC_NAME);
+  async generateBookDirectory(genData: GenerationData): Promise<string> {
+    const tomlFile = d.path.join(genData.sourceDir, this.DESC_NAME);
     const ex = await d.exists(tomlFile);
     if (!ex) {
-      return Promise.resolve(`${this.DESC_NAME} does not exist in ${sourceDir}`);
+      return `${this.DESC_NAME} does not exist in ${genData.sourceDir}`;
     } else {
       const fileContent = await readSource(tomlFile);
       const descriptionRecord = d.toml.parse(fileContent);
+      (descriptionRecord.pages as Array<PageDesc>).sort((page: PageDesc) =>
+        page.number
+      );
 
-      const genData = {
-        sourceDir: sourceDir,
-        destDir: destDir,
-        destFile: "index.html",
-        sourceAssetsDir: "assets",
-        assetsDir: "assets",
-        imgwidth: 800,
-        imgheight: 600,
-        cssFile: "styles.css",
-        title: "Bajeczki dla Eweczki"
-      };
-
-      await this.generateFile(descriptionRecord, genData);
+      await d.ensureDir(genData.destDir);
       await this.copyAssets(descriptionRecord, genData);
-      return Promise.resolve(` wrote to ${d.path.join(genData.destDir, genData.destFile)}`);
+      await this.generateFile(descriptionRecord, genData);
+      return `Written to ${this.indexFile(genData)}`;
     }
   }
 }

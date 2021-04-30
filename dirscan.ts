@@ -10,7 +10,6 @@ import { execFnIfDirExists } from "./utils.ts";
 * @return Promise with Array of strings
 * */
 async function gatherSubdirs(root: string): Promise<Array<string>> {
-    console.log("gather subdir for", root);
     const a = new Array<string>();
     for await (const e of d.walk(root, {maxDepth: 1, includeFiles: false})) {
       if (e.path !== root) { 
@@ -20,6 +19,16 @@ async function gatherSubdirs(root: string): Promise<Array<string>> {
     return a;
 }
 
+
+const genData = {
+  destFile: "index.html",
+  sourceAssetsDir: "assets",
+  assetsDir: "assets",
+  imgwidth: 800,
+  imgheight: 600,
+  cssFile: "styles.css",
+  title: "Bajeczki dla Eweczki"
+};
 
 /**
 * Scans rootpath for story directories and generates html pages to same-named subdirectory of destDir.
@@ -33,9 +42,9 @@ async function main(rootPath: string, destDir: string) {
   for (const sourceDir of dirs) {
     const parsedSourceDir = d.path.parse(sourceDir)
     const fullDestDir : string = d.path.join(destDir, parsedSourceDir.base); 
+    await d.ensureDir(fullDestDir);
     const gen = new Generator();
-    const resStr =  await gen.show(sourceDir, fullDestDir);
-    console.log(resStr);
+    console.log(await gen.generateBookDirectory({sourceDir: sourceDir, destDir: fullDestDir, ...genData}));
   }
 }
 

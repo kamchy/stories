@@ -32,3 +32,10 @@ export interface GenerationData {
   cssFile: string,
   title: string
 }
+
+export interface LibraryInfo {
+  indexFile: string,
+  imageFile: string,
+  title: string,
+  author?: string
+}

@@ -1,7 +1,7 @@
-import { GenerationData, PageDesc } from "./types.ts";
+import { GenerationData, PageDesc, BookDesc }  from "./types.ts";
 
 export function renderStory(
-  rec: Record<string, unknown>,
+  rec: BookDesc, 
   genData: GenerationData,
 ) {
   const author = rec.author ?? "Kamila Chyla";

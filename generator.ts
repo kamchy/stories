@@ -1,8 +1,7 @@
 import * as d from "./deps.ts";
 import { renderStory } from "./renderer.ts";
-import { GenerationData, PageDesc } from "./types.ts";
-import { readSource } from "./utils.ts";
-
+import { GenerationData, PageDesc, BookDesc } from "./types.ts";
+import { BookParser } from "./bookparser.ts";
 /**
 * Generator for html version of stories.
 * Creates directory for static version of the story and copies relevant assets.
@@ -35,10 +34,10 @@ export class Generator {
   * Copies all images indicated by rec (deserialized story content descriptor from .toml)
   * and css file to target directories according to GenerationData info.
   *
-  * @param rec deserialized description.toml 
+  * @param rec BookDesc instance
   * @param genData info about source and destination paths where files will be copied
   * */
-  async copyAssets(rec: Record<string, unknown>, genData: GenerationData) {
+  async copyAssets(rec: BookDesc, genData: GenerationData) {
     const destAssetsDir = d.path.join(genData.destDir, genData.assetsDir);
     await d.ensureDir(destAssetsDir);
 
@@ -72,7 +71,7 @@ export class Generator {
   * @param rec deserialized description.toml 
   * @param genData info about source and destination paths where files will be copied
   * */
-  async generateFile(rec: Record<string, unknown>, genData: GenerationData) {
+  async generateFile(rec: BookDesc, genData: GenerationData) {
     const idx = this.indexFile(genData);
 
     await d.ensureFile(idx);
@@ -94,19 +93,18 @@ export class Generator {
   * */
   async generateBookDirectory(genData: GenerationData): Promise<string> {
     const tomlFile = d.path.join(genData.sourceDir, this.DESC_NAME);
-    const ex = await d.exists(tomlFile);
-    if (!ex) {
+    const bp = new BookParser(tomlFile);
+    if (!bp.canParse()) {
       return `${this.DESC_NAME} does not exist in ${genData.sourceDir}`;
     } else {
-      const fileContent = await readSource(tomlFile);
-      const descriptionRecord = d.toml.parse(fileContent);
-      (descriptionRecord.pages as Array<PageDesc>).sort((page: PageDesc) =>
-        page.number
-      );
-
+      await bp.parse();
+      const bd = bp.description();
+      if (bd === null) {
+        return "Could not parse" + tomlFile;
+      }
       await d.ensureDir(genData.destDir);
-      await this.copyAssets(descriptionRecord, genData);
-      await this.generateFile(descriptionRecord, genData);
+      await this.copyAssets(bd, genData);
+      await this.generateFile(bd, genData);
       return `Written to ${this.indexFile(genData)}`;
     }
   }

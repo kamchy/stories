@@ -33,9 +33,6 @@ export interface GenerationData {
   title: string
 }
 
-export interface LibraryInfo {
-  indexFile: string,
-  imageFile: string,
-  title: string,
-  author?: string
+export interface DirectoryGenerationResult {
+
 }

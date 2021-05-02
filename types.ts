@@ -30,6 +30,7 @@ export interface GenerationData {
   imgwidth: number,
   imgheight: number,
   cssFile: string,
+  indexCssFile: string,
   title: string
 }
 
@@ -37,4 +38,12 @@ export interface OutputBook {
   bookDesc: BookDesc,
   sourceDir: string,
   indexFileName: string,
+}
+
+
+export interface IndexGeneratorData {
+  indexAssetsPath: string,
+  indexPath: string
+  indexStylesheet: string,
+  storyStylesheet: string,
 }

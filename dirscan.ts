@@ -27,6 +27,7 @@ const genData = {
   imgwidth: 800,
   imgheight: 600,
   cssFile: "styles.css",
+  indexCssFile: "index.css",
   title: "Bajeczki dla Eweczki"
 };
 
@@ -47,7 +48,13 @@ async function main(rootPath: string, destDir: string) {
     const genConfig = {sourceDir: sourceDir, destDir: fullDestDir, ...genData}
     await gen.generateBookDirectory(genConfig);
   }
-  gen.generateBooksIndex(destDir);
+
+  gen.generateBooksIndex({
+    indexAssetsPath: d.path.join(destDir, genData.assetsDir),
+    indexPath: d.path.join(destDir, "index.html"),
+    storyStylesheet: d.path.join(Deno.cwd(), genData.sourceAssetsDir, genData.cssFile),
+    indexStylesheet: d.path.join(Deno.cwd(), genData.sourceAssetsDir, genData.indexCssFile),
+  });
   
 }
 

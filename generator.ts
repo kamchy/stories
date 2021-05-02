@@ -1,6 +1,6 @@
 import * as d from "./deps.ts";
 import { renderStory, renderIndex } from "./renderer.ts";
-import { GenerationData, PageDesc, BookDesc, OutputBook } from "./types.ts";
+import { GenerationData, PageDesc, BookDesc, OutputBook, IndexGeneratorData } from "./types.ts";
 import { BookParser } from "./bookparser.ts";
 /**
 * Generator for html version of stories.
@@ -55,12 +55,8 @@ export class Generator {
       const dest = d.path.join(destAssetsDir, parsedSource.base);
       this.copy(source, dest);
     }
-
-    this.copy(
-      d.path.join(Deno.cwd(), genData.sourceAssetsDir, genData.cssFile),
-      d.path.join(destAssetsDir, genData.cssFile),
-    );
   }
+
 
   indexFile(genData: GenerationData): string {
     return d.path.join(genData.destDir, genData.destFile);
@@ -104,7 +100,12 @@ export class Generator {
       if (bd === null) {
         return "Could not parse" + tomlFile;
       }
-      this.appendOutputBook({bookDesc: bd, sourceDir: genData.sourceDir, indexFileName: genData.destFile});
+
+      this.appendOutputBook(
+        {bookDesc: bd, 
+          sourceDir: genData.sourceDir, 
+          indexFileName: genData.destFile});
+
       await d.ensureDir(genData.destDir);
       this.copyAssets(bd, genData);
       this.generateFile(
@@ -115,10 +116,16 @@ export class Generator {
 
   }
 
-  generateBooksIndex(destDir: string) {
-    this.generateFile(
-      d.path.join(destDir, "index.html"), 
-      () => renderIndex(this.books)
+  async generateBooksIndex(cfg: IndexGeneratorData) {
+    await d.ensureDir(cfg.indexAssetsPath);
+    for (const asset of [cfg.storyStylesheet, cfg.indexStylesheet]) {
+      await this.copy(asset, d.path.join(cfg.indexAssetsPath, d.path.parse(asset).base));
+    }
+
+    const indexStylesheet = d.path.join("..", cfg.indexAssetsPath, cfg.indexStylesheet);
+    await this.generateFile(
+      cfg.indexPath,
+      () => renderIndex(this.books, indexStylesheet)
     )
 
   }

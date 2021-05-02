@@ -14,7 +14,7 @@ export function renderStory(
   <title>${genData.title}</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <link rel="stylesheet" href="${genData.assetsDir}/${genData.cssFile}">
+  <link rel="stylesheet" href="../${genData.assetsDir}/${genData.cssFile}">
   </head>
   <body>
   <div id="main">
@@ -110,7 +110,7 @@ function renderBook(book: OutputBook): string {
   </div>
   `;
 }
-export function renderIndex(books: Array<OutputBook>): string {
+export function renderIndex(books: Array<OutputBook>, indexStylesheet: string): string {
 
   const articles = books.map(b => `<article>${renderBook(b)}</article>`).join("\n");
 
@@ -120,6 +120,8 @@ export function renderIndex(books: Array<OutputBook>): string {
   <head>
   <title>bajki</title>
   <meta charset="UTF-8">
+
+  <link rel="stylesheet" href="${indexStylesheet}">
   <meta name="viewport" content="width=device-width,initial-scale=1">
 
   </head>

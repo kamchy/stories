@@ -42,8 +42,8 @@ export interface OutputBook {
 
 
 export interface IndexGeneratorData {
-  indexAssetsPath: string,
-  indexPath: string
+  destDir: string,
+  assetsDir: string,
   indexStylesheet: string,
   storyStylesheet: string,
 }

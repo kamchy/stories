@@ -50,10 +50,10 @@ async function main(rootPath: string, destDir: string) {
   }
 
   gen.generateBooksIndex({
-    indexAssetsPath: d.path.join(destDir, genData.assetsDir),
-    indexPath: d.path.join(destDir, "index.html"),
-    storyStylesheet: d.path.join(Deno.cwd(), genData.sourceAssetsDir, genData.cssFile),
-    indexStylesheet: d.path.join(Deno.cwd(), genData.sourceAssetsDir, genData.indexCssFile),
+    destDir: destDir,
+    assetsDir: genData.assetsDir,
+    storyStylesheet: genData.cssFile, 
+    indexStylesheet: genData.indexCssFile,
   });
   
 }

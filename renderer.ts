@@ -101,19 +101,17 @@ function renderBook(book: OutputBook): string {
   const ind: string = path.join(outPath.name, book.indexFileName);
   return `
   <div class="bookdesc">
-    <div>
-    <h2><a href="${ind}"> ${book.bookDesc.title} </a></h2>
-    <div>${book.bookDesc.author ?? ""}</div>
+    <h2 class="title"><a href="${ind}"> ${book.bookDesc.title} </a></h2>
+    <div class="author">${book.bookDesc.author ?? ""}</div>
     <a href="${ind}">
-      <img width="400" src="${img}"/>
+      <img src="${img}"/>
     </a>
   </div>
   `;
 }
+
 export function renderIndex(books: Array<OutputBook>, indexStylesheet: string): string {
-
   const articles = books.map(b => `<article>${renderBook(b)}</article>`).join("\n");
-
   const s = `
   <!doctype html>
   <html>
@@ -126,9 +124,8 @@ export function renderIndex(books: Array<OutputBook>, indexStylesheet: string): 
 
   </head>
   <body>
-  <div id="main">
   <title> Książeczki dla Eweczki </title>
-  <section class="page titlepage" >
+  <section class="page" >
     ${articles}
   </section>
   </body>

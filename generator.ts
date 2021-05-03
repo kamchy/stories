@@ -113,18 +113,20 @@ export class Generator {
         () => renderStory(bd, genData));
       return this.indexFile(genData);
     }
-
   }
 
   async generateBooksIndex(cfg: IndexGeneratorData) {
-    await d.ensureDir(cfg.indexAssetsPath);
-    for (const asset of [cfg.storyStylesheet, cfg.indexStylesheet]) {
-      await this.copy(asset, d.path.join(cfg.indexAssetsPath, d.path.parse(asset).base));
-    }
+    const indexAssetsPath = d.path.join(cfg.destDir, cfg.assetsDir)
+    await d.ensureDir(indexAssetsPath);
+    console.log(`indexAssetsPath is ${indexAssetsPath}`);
+    this.copy(d.path.join(cfg.assetsDir, cfg.storyStylesheet), 
+              d.path.join(indexAssetsPath, cfg.storyStylesheet));
+    this.copy(d.path.join(cfg.assetsDir, cfg.indexStylesheet),
+              d.path.join(indexAssetsPath, cfg.indexStylesheet));
 
-    const indexStylesheet = d.path.join("..", cfg.indexAssetsPath, cfg.indexStylesheet);
+    const indexStylesheet = d.path.join(cfg.assetsDir, cfg.indexStylesheet);
     await this.generateFile(
-      cfg.indexPath,
+      d.path.join(cfg.destDir, "index.html"),
       () => renderIndex(this.books, indexStylesheet)
     )
 

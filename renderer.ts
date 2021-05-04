@@ -2,7 +2,7 @@ import { GenerationData, PageDesc, BookDesc, OutputBook}  from "./types.ts";
 import { path } from "./deps.ts";
 
 export function renderStory(
-  rec: BookDesc, 
+  rec: BookDesc,
   genData: GenerationData,
 ) {
   const author = rec.author ?? "Kamila Chyla";
@@ -106,6 +106,7 @@ function renderBook(book: OutputBook): string {
     <a href="${ind}">
       <img src="${img}"/>
     </a>
+    <div class="footer"> Bajeczki dla Eweczki </div>
   </div>
   `;
 }
@@ -121,13 +122,18 @@ export function renderIndex(books: Array<OutputBook>, indexStylesheet: string): 
 
   <link rel="stylesheet" href="${indexStylesheet}">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-
   </head>
   <body>
-  <title> Książeczki dla Eweczki </title>
-  <section class="page" >
-    ${articles}
-  </section>
+    <section id="header">
+    <h1>Bajeczki dla Eweczki </h1>
+    <h2>Lista mini-książeczek dla dwulatka.</h2>
+    </section>
+    <section class="page" >
+      ${articles}
+    </section>
+    <section id="footer">
+    <a href="https://kamilachyla.com"> kamilachyla.com </a>
+    </section>
   </body>
   </html>
   `;

@@ -4,6 +4,36 @@
   --page-bg-hover: hsl(330, 80%, 60%);
 }
 
+body {
+ margin: 0;
+ padding: 0;
+}
+
+body {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+}
+
+body > section {
+  flex-grow: 100%;
+}
+
+#header {
+  border-bottom: 1px solid var(--page-bg-hover);
+}
+
+#footer {
+  border-top: 1px solid var(--page-bg-hover);
+  padding-top: 1em;
+  padding-bottom: 1em;
+}
+
+#header, #footer {
+  text-align: center;
+  background-color: var(--page-bg);
+}
+
 .bookdesc {
   display: flex;
   flex-flow: column nowrap;
@@ -11,22 +41,21 @@
   border: 1px solid  var(--border);
   border-radius: 1em;
   margin: 1em;
-
   background-color: var(--page-bg);
-  max-width: 30vw;
-  max-height: 60vh;
+  width: 40vmin;
   
 }
 
 .bookdesc img {
-  max-width: 30vw;
-  max-height: 40vh;
-  
-  
-    
-  padding: 1em;
+  width: 40vmin;
 }
 
+.bookdesc>.footer {
+  margin-top: 1em;
+  color: darkgray;
+  border-top: 1px solid var(--page-bg-hover);
+
+}
 .bookdesc:hover {
   background-color: var(--page-bg-hover);
   
@@ -36,8 +65,18 @@
   margin-top: 2em;
 }
 
+.bookdesc .author {
+  color: gray;
+  font-size: 0.8em;
+  font-style: italic;
+}
+
+.bookdesc > div.footer {
+   padding-top: 1em;
+  padding-bottom: 0.5em;
+}
+
 .page {
  display: flex;
  flex-flow: row wrap;
- 
 }

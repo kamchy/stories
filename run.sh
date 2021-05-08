@@ -1,1 +1,1 @@
-deno run --allow-read --allow-write --unstable dirscan.ts ~/Dokumenty/bajki
+deno run --allow-read --allow-write --unstable main.ts --source ~/Dokumenty/bajki ---dest "output"

@@ -38,7 +38,7 @@ const genData = {
 * @param rootPath path with story directories (ones containing description.toml)
 * @param destDir name of directory (created if needed) where html will be generated and resources (images from story directories) copied 
 * */
-async function main(rootPath: string, destDir: string) {
+export default async function main(rootPath: string, destDir = "output") {
   const dirs = await execFnIfDirExists(rootPath, gatherSubdirs);
   const gen = new Generator();
   for (const sourceDir of dirs) {
@@ -58,7 +58,3 @@ async function main(rootPath: string, destDir: string) {
   
 }
 
-/** Name of output directory */
-const DESTDIR = "output";
-
-main(Deno.args[0], DESTDIR);

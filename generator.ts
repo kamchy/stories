@@ -1,15 +1,21 @@
 import * as d from "./deps.ts";
-import { renderStory, renderIndex } from "./renderer.ts";
-import { GenerationData, PageDesc, BookDesc, OutputBook, IndexGeneratorData } from "./types.ts";
+import { renderIndex, renderStory } from "./renderer.ts";
+import {
+  BookDesc,
+  GenerationData,
+  IndexGeneratorData,
+  OutputBook,
+  PageDesc,
+} from "./types.ts";
 import { BookParser } from "./bookparser.ts";
 /**
-* Generator for html version of stories.
-* Creates directory for static version of the story and copies relevant assets.
-* Directory contains: 
-*   * static html file genrated from descriptior.toml file
-*   * assets: image files indicated by descriptor.toml)
-*   * assets: css file
-* */
+ * Generator for html version of stories.
+ * Creates directory for static version of the story and copies relevant assets.
+ * Directory contains:
+ *   * static html file genrated from descriptior.toml file
+ *   * assets: image files indicated by descriptor.toml)
+ *   * assets: css file
+ */
 
 export class Generator {
   DESC_NAME = "description.toml";
@@ -32,12 +38,12 @@ export class Generator {
   }
 
   /**
-  * Copies all images indicated by rec (deserialized story content descriptor from .toml)
-  * and css file to target directories according to GenerationData info.
-  *
-  * @param rec BookDesc instance
-  * @param genData info about source and destination paths where files will be copied
-  * */
+   * Copies all images indicated by rec (deserialized story content descriptor from .toml)
+   * and css file to target directories according to GenerationData info.
+   *
+   * @param rec BookDesc instance
+   * @param genData info about source and destination paths where files will be copied
+   */
   async copyAssets(rec: BookDesc, genData: GenerationData) {
     const destAssetsDir = d.path.join(genData.destDir, genData.assetsDir);
     await d.ensureDir(destAssetsDir);
@@ -57,18 +63,17 @@ export class Generator {
     }
   }
 
-
   indexFile(genData: GenerationData): string {
     return d.path.join(genData.destDir, genData.destFile);
   }
 
   /**
-  * (Async) generates html file with a story and images/css links.
-  *
-  * @param fileName name of file
-  * @param textProvide function that generates string to be written
-  * */
-  async generateFile(fileName: string, textProvider: ()=>string) {
+   * (Async) generates html file with a story and images/css links.
+   *
+   * @param fileName name of file
+   * @param textProvide function that generates string to be written
+   */
+  async generateFile(fileName: string, textProvider: () => string) {
     await d.ensureFile(fileName);
     await Deno.writeTextFile(fileName, textProvider());
     console.log(`Generated ${fileName}`);
@@ -78,17 +83,17 @@ export class Generator {
     this.books.push(bd);
   }
   /**
-  * Main generation method of Generator.
-  * Deserializes .toml file.
-  * Generates html file.
-  * Copies assets to target (static) story directory.
-  *
-  * Assets are copied (and overwritten) unconditionally, even if not changed.
-  *
-  * @param sourceDir  source directory (story directory) with decription.toml file
-  * @param destDir  destination directory (corresponding to story directory) 
-  *                 where html file will be generated and assets copied.
-  * */
+   * Main generation method of Generator.
+   * Deserializes .toml file.
+   * Generates html file.
+   * Copies assets to target (static) story directory.
+   *
+   * Assets are copied (and overwritten) unconditionally, even if not changed.
+   *
+   * @param sourceDir  source directory (story directory) with decription.toml file
+   * @param destDir  destination directory (corresponding to story directory)
+   *                 where html file will be generated and assets copied.
+   */
   async generateBookDirectory(genData: GenerationData): Promise<string> {
     const tomlFile = d.path.join(genData.sourceDir, this.DESC_NAME);
     const bp = new BookParser(tomlFile);
@@ -102,33 +107,40 @@ export class Generator {
       }
 
       this.appendOutputBook(
-        {bookDesc: bd, 
-          sourceDir: genData.sourceDir, 
-          indexFileName: genData.destFile});
+        {
+          bookDesc: bd,
+          sourceDir: genData.sourceDir,
+          indexFileName: genData.destFile,
+        },
+      );
 
       await d.ensureDir(genData.destDir);
       this.copyAssets(bd, genData);
       this.generateFile(
-        this.indexFile(genData), 
-        () => renderStory(bd, genData));
+        this.indexFile(genData),
+        () => renderStory(bd, genData),
+      );
       return this.indexFile(genData);
     }
   }
 
   async generateBooksIndex(cfg: IndexGeneratorData) {
-    const indexAssetsPath = d.path.join(cfg.destDir, cfg.assetsDir)
+    const indexAssetsPath = d.path.join(cfg.destDir, cfg.assetsDir);
     await d.ensureDir(indexAssetsPath);
     console.log(`indexAssetsPath is ${indexAssetsPath}`);
-    this.copy(d.path.join(cfg.assetsDir, cfg.storyStylesheet), 
-              d.path.join(indexAssetsPath, cfg.storyStylesheet));
-    this.copy(d.path.join(cfg.assetsDir, cfg.indexStylesheet),
-              d.path.join(indexAssetsPath, cfg.indexStylesheet));
+    this.copy(
+      d.path.join(cfg.assetsDir, cfg.storyStylesheet),
+      d.path.join(indexAssetsPath, cfg.storyStylesheet),
+    );
+    this.copy(
+      d.path.join(cfg.assetsDir, cfg.indexStylesheet),
+      d.path.join(indexAssetsPath, cfg.indexStylesheet),
+    );
 
     const indexStylesheet = d.path.join(cfg.assetsDir, cfg.indexStylesheet);
     await this.generateFile(
       d.path.join(cfg.destDir, "index.html"),
-      () => renderIndex(this.books, indexStylesheet)
-    )
-
+      () => renderIndex(this.books, indexStylesheet),
+    );
   }
 }

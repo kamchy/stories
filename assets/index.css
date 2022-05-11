@@ -1,7 +1,7 @@
 :root {
-  --border: hsl(330, 90%, 50%);
+  --border: hsl(330, 60%, 50%);
   --page-bg: hsl(330, 50%, 90%);
-  --page-bg-hover: hsl(330, 80%, 60%);
+  --page-bg-hover: hsl(330, 70%, 60%);
 }
 
 body {
@@ -48,6 +48,7 @@ body > section {
 
 .bookdesc img {
   width: 40vmin;
+  aspect-ratio: 1;
 }
 
 .bookdesc>.footer {

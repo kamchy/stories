@@ -111,14 +111,14 @@ function renderBookCover(book: OutputBook): string {
     <div class="contentlinks">
     <a href="${ind}"
       class="contentlink">
-      <img src="../assets/imghtml.png">
+      <img src="assets/imghtml.png">
     <span>otwórz jako html </span>
     </a>
 
 
     <a href="${pdf}"
     class="contentlink">
-    <img src="../assets/imgpdf.png">
+    <img src="assets/imgpdf.png">
       <span>otwórz jako pdf</span>
     </a>
   </div>

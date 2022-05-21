@@ -25,7 +25,6 @@ export function renderStory(
     width="${genData.imgwidth}"
     height="${genData.imgheight}"
     src="${genData.assetsDir}/${rec.titleImagePath}"/>
-
     <div class="footer">${footerLink}</div>
   </section>
   `;
@@ -37,10 +36,12 @@ export function renderStory(
     ).join("");
     s += `
     <section class="page normal">
+
       <img
       width="${genData.imgwidth}"
       height="${genData.imgheight}"
       src="${genData.assetsDir}/${page.imagePath}" />
+
       <div class="lineswrapper"> ${lines}</div>
       <div class="footer"><span>${footerLink}</span><span>${page.number}</span></div>
     </section>
@@ -95,24 +96,39 @@ export function renderStory(
   return s;
 }
 
-function renderBook(book: OutputBook): string {
+function renderBookCover(book: OutputBook): string {
   const outPath = path.parse(book.sourceDir);
   const img: string = path.join(outPath.name, "assets", book.bookDesc.titleImagePath);
   const ind: string = path.join(outPath.name, book.indexFileName);
+  const pdf: string = path.join(outPath.name, "assets", book.pdfFileName);
   return `
   <div class="bookdesc">
-    <h2 class="title"><a href="${ind}"> ${book.bookDesc.title} </a></h2>
+    <h2 class="title">${book.bookDesc.title}</h2>
     <div class="author">${book.bookDesc.author ?? ""}</div>
     <a href="${ind}">
-      <img src="${img}"/>
+    <img class="coverimage" src="${img}"/>
     </a>
+    <div class="contentlinks">
+    <a href="${ind}"
+      class="contentlink">
+      <img src="../assets/imghtml.png">
+    <span>otwórz jako html </span>
+    </a>
+
+
+    <a href="${pdf}"
+    class="contentlink">
+    <img src="../assets/imgpdf.png">
+      <span>otwórz jako pdf</span>
+    </a>
+  </div>
     <div class="footer"> Bajeczki dla Eweczki </div>
   </div>
   `;
 }
 
 export function renderIndex(books: Array<OutputBook>, indexStylesheet: string): string {
-  const articles = books.map(b => `<article>${renderBook(b)}</article>`).join("\n");
+  const articles = books.map(b => `<article>${renderBookCover(b)}</article>`).join("\n");
   const s = `
   <!doctype html>
   <html>
@@ -128,6 +144,7 @@ export function renderIndex(books: Array<OutputBook>, indexStylesheet: string): 
     <h1>Bajeczki dla Eweczki </h1>
     <h2>Lista mini-książeczek dla dwulatka.</h2>
     </section>
+
     <section class="page" >
       ${articles}
     </section>

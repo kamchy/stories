@@ -1,7 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Vollkorn:ital@1&display=swap');
+
 :root {
   --border: hsl(330, 60%, 50%);
   --page-bg: hsl(330, 50%, 90%);
   --page-bg-hover: hsl(330, 70%, 60%);
+  --book-width: 35vmin;
 }
 
 body {
@@ -13,10 +16,11 @@ body {
   display: flex;
   flex-flow: column nowrap;
   justify-content: center;
-}
+  font-family: 'Vollkorn', serif;
+  }
 
-body > section {
-  flex-grow: 100%;
+#header h2 {
+  color: gray;
 }
 
 #header {
@@ -42,12 +46,12 @@ body > section {
   border-radius: 1em;
   margin: 1em;
   background-color: var(--page-bg);
-  width: 40vmin;
-  
+  width: var(--book-width);
+
 }
 
-.bookdesc img {
-  width: 40vmin;
+.coverimage {
+  width: var(--book-width);
   aspect-ratio: 1;
 }
 
@@ -57,9 +61,12 @@ body > section {
   border-top: 1px solid var(--page-bg-hover);
 
 }
-.bookdesc:hover {
-  background-color: var(--page-bg-hover);
-  
+.contentlink{
+  display: block;
+}
+
+.contentlink img{
+  width: 1rem;
 }
 
 .bookdesc img {
@@ -81,3 +88,4 @@ body > section {
  display: flex;
  flex-flow: row wrap;
 }
+

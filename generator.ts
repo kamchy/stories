@@ -54,6 +54,7 @@ export class Generator {
     for (const p of pages) {
       assets.push(p.imagePath);
     }
+    assets.push(genData.pdfFile);
 
     for (const f of assets) {
       const source = d.path.join(genData.sourceDir, f as string);
@@ -90,9 +91,7 @@ export class Generator {
    *
    * Assets are copied (and overwritten) unconditionally, even if not changed.
    *
-   * @param sourceDir  source directory (story directory) with decription.toml file
-   * @param destDir  destination directory (corresponding to story directory)
-   *                 where html file will be generated and assets copied.
+   * @param genData  GenerationData object
    */
   async generateBookDirectory(genData: GenerationData): Promise<string> {
     const tomlFile = d.path.join(genData.sourceDir, this.DESC_NAME);
@@ -111,6 +110,7 @@ export class Generator {
           bookDesc: bd,
           sourceDir: genData.sourceDir,
           indexFileName: genData.destFile,
+          pdfFileName: genData.pdfFile
         },
       );
 
@@ -127,15 +127,13 @@ export class Generator {
   async generateBooksIndex(cfg: IndexGeneratorData) {
     const indexAssetsPath = d.path.join(cfg.destDir, cfg.assetsDir);
     await d.ensureDir(indexAssetsPath);
-    console.log(`indexAssetsPath is ${indexAssetsPath}`);
-    this.copy(
-      d.path.join(cfg.assetsDir, cfg.storyStylesheet),
-      d.path.join(indexAssetsPath, cfg.storyStylesheet),
-    );
-    this.copy(
-      d.path.join(cfg.assetsDir, cfg.indexStylesheet),
-      d.path.join(indexAssetsPath, cfg.indexStylesheet),
-    );
+    let targetFiles = [cfg.storyStylesheet, cfg.indexStylesheet, "imghtml.png", "imgpdf.png"]
+    for (let fname of targetFiles) {
+      let fr =  d.path.join(cfg.assetsDir, fname)
+      let to = d.path.join(indexAssetsPath, fname)
+      console.log(`copy: \nfrom: ${fr}\nto  : ${to}`)
+      this.copy(fr, to);
+    }
 
     const indexStylesheet = d.path.join(cfg.assetsDir, cfg.indexStylesheet);
     await this.generateFile(

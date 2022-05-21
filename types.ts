@@ -31,13 +31,15 @@ export interface GenerationData {
   imgheight: number,
   cssFile: string,
   indexCssFile: string,
-  title: string
+  title: string,
+  pdfFile: string
 }
 
 export interface OutputBook {
   bookDesc: BookDesc,
   sourceDir: string,
   indexFileName: string,
+  pdfFileName: string
 }
 
 

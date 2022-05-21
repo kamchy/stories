@@ -10,7 +10,7 @@
 .page .lineswrapper {
   font-size: 1.2em;
   padding: 1em 0.2em;
-  
+  background-color: var(--page-bg);
 }
 
 
@@ -55,3 +55,4 @@ img {
   padding: 0.5em 1em;
   color: var(--footer-text);
 }
+
